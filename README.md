@@ -1,0 +1,1 @@
+# Simulated lamp for DomoticASW
