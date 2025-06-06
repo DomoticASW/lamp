@@ -31,15 +31,9 @@ TestResults/
 *.coveragexml
 
 # Docker
-**/docker-compose*.yml
-**/Dockerfile
-.dockerignore
-docker-compose.override.yml
-docker-compose.debug.yml
-docker-compose.release.yml
-docker-compose.*
-.env
-.env.*
+**/docker-compose.override.yml
+**/.dockerignore
+**/bin/Debug/net*/docker/
 
 # OS generated files
 Thumbs.db
