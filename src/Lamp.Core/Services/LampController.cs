@@ -16,75 +16,49 @@ namespace Lamp.Core.Services
             _lamp = lamp ?? new Models.Lamp();
         }
 
-        public LampStatus ToggleLamp()
+        public PowerStateResponse ToggleLamp()
         {
-            _lamp.ToggleState();
-            return GetStatus();
+            return _lamp.ToggleState();
         }
 
-        public LampStatus SetLightState(bool isOn)
+        public PowerStateResponse SetLightState(bool isOn)
         {
-            if (isOn)
-                _lamp.TurnOn();
-            else
-                _lamp.TurnOff();
-
-            return GetStatus();
+            return isOn ? _lamp.TurnOn() : _lamp.TurnOff();
         }
 
-        public LampStatus AdjustBrightness(int brightness)
+        public BrightnessResponse AdjustBrightness(int brightness)
         {
-            _lamp.SetPendingBrightness(brightness);
-            return GetStatus();
+            return _lamp.SetPendingBrightness(brightness);
         }
 
-        public LampStatus ConfirmBrightnessChange()
+        public BrightnessResponse ConfirmBrightnessChange()
         {
-            _lamp.ConfirmBrightness();
-            return GetStatus();
+            return _lamp.ConfirmBrightness();
         }
 
-        public LampStatus CancelBrightnessChange()
+        public BrightnessResponse CancelBrightnessChange()
         {
-            _lamp.CancelBrightnessChange();
-            return GetStatus();
+            return _lamp.CancelBrightnessChange();
         }
 
-        public LampStatus SetLampColor(string hexColor)
+        public ColorResponse SetLampColor(string hexColor)
         {
-            _lamp.SetColor(hexColor);
-            return GetStatus();
+            return _lamp.SetColor(hexColor);
         }
 
-        public LampStatus SetLampColor(int red, int green, int blue)
+        public ColorResponse SetLampColor(int red, int green, int blue)
         {
-            _lamp.SetColor(red, green, blue);
-            return GetStatus();
+            return _lamp.SetColor(red, green, blue);
         }
 
-        public LampStatus GetCurrentStatus()
+        public FullStatusResponse GetCurrentStatus()
         {
-            return GetStatus();
+            return _lamp.GetFullStatus();
         }
 
         public Models.Lamp GetLamp()
         {
             return _lamp;
-        }
-
-        private LampStatus GetStatus()
-        {
-            return new LampStatus
-            {
-                IsOn = _lamp.IsOn,
-                Brightness = _lamp.Brightness,
-                PendingBrightness = _lamp.PendingBrightness,
-                Color = _lamp.Color,
-                Red = _lamp.Red,
-                Green = _lamp.Green,
-                Blue = _lamp.Blue,
-                LastUpdated = _lamp.LastUpdated
-            };
         }
     }
 }

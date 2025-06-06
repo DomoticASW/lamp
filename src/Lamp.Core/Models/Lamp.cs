@@ -1,4 +1,6 @@
+using System;
 using System.ComponentModel.DataAnnotations;
+using Lamp.Core.Models;
 
 namespace Lamp.Core.Models
 {
@@ -9,79 +11,183 @@ namespace Lamp.Core.Models
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; } = "Lamp";
+        public string Name { get; set; } = "Smart Lamp";
 
-        public bool IsOn { get; set; } = false;
+        private bool _isOn = false;
+        private int _brightness = 50;
+        private int _pendingBrightness = 50;
+        private string _color = "#FFFFFF";
+        private int _red = 255;
+        private int _green = 255;
+        private int _blue = 255;
 
-        [Range(0, 100)]
-        public int Brightness { get; set; } = 50;
-
-        [Range(0, 100)]
-        public int PendingBrightness { get; set; } = 50;
-
-        [StringLength(7)]
-        public string Color { get; set; } = "#FFFFFF";
-
-        [Range(0, 255)]
-        public int Red { get; set; } = 255;
-
-        [Range(0, 255)]
-        public int Green { get; set; } = 255;
-
-        [Range(0, 255)]
-        public int Blue { get; set; } = 255;
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
-
-        public void TurnOn()
+        public DateTime LastUpdated { get; private set; } = DateTime.UtcNow;
+        public bool IsOn
         {
-            IsOn = true;
-            LastUpdated = DateTime.UtcNow;
-        }
-
-        public void TurnOff()
-        {
-            IsOn = false;
-            LastUpdated = DateTime.UtcNow;
-        }
-
-        public void ToggleState()
-        {
-            IsOn = !IsOn;
-            LastUpdated = DateTime.UtcNow;
-        }
-
-        public void SetPendingBrightness(int brightness)
-        {
-            if (brightness >= 0 && brightness <= 100)
+            get => _isOn;
+            private set
             {
-                PendingBrightness = brightness;
+                _isOn = value;
+                LastUpdated = DateTime.UtcNow;
             }
         }
 
-        public void ConfirmBrightness()
+        [Range(0, 100)]
+        public int Brightness
+        {
+            get => _brightness;
+            private set
+            {
+                if (value >= 0 && value <= 100)
+                {
+                    _brightness = value;
+                    LastUpdated = DateTime.UtcNow;
+                }
+            }
+        }
+
+        [Range(0, 100)]
+        public int PendingBrightness
+        {
+            get => _pendingBrightness;
+            private set
+            {
+                if (value >= 0 && value <= 100)
+                {
+                    _pendingBrightness = value;
+                }
+            }
+        }
+
+        [StringLength(7)]
+        public string Color
+        {
+            get => _color;
+            private set
+            {
+                if (IsValidHexColor(value))
+                {
+                    _color = value;
+                    LastUpdated = DateTime.UtcNow;
+                }
+            }
+        }
+
+        [Range(0, 255)]
+        public int Red
+        {
+            get => _red;
+            private set
+            {
+                if (value >= 0 && value <= 255)
+                {
+                    _red = value;
+                }
+            }
+        }
+
+        [Range(0, 255)]
+        public int Green
+        {
+            get => _green;
+            private set
+            {
+                if (value >= 0 && value <= 255)
+                {
+                    _green = value;
+                }
+            }
+        }
+
+        [Range(0, 255)]
+        public int Blue
+        {
+            get => _blue;
+            private set
+            {
+                if (value >= 0 && value <= 255)
+                {
+                    _blue = value;
+                }
+            }
+        }
+
+
+        public PowerStateResponse TurnOn()
+        {
+            IsOn = true;
+            return new PowerStateResponse { IsOn = IsOn };
+        }
+
+        public PowerStateResponse TurnOff()
+        {
+            IsOn = false;
+            return new PowerStateResponse { IsOn = IsOn };
+        }
+
+        public PowerStateResponse ToggleState()
+        {
+            IsOn = !IsOn;
+            return new PowerStateResponse { IsOn = IsOn };
+        }
+
+        public BrightnessResponse SetPendingBrightness(int brightness)
+        {
+            PendingBrightness = brightness;
+            return new BrightnessResponse
+            {
+                CurrentBrightness = Brightness,
+                PendingBrightness = PendingBrightness
+            };
+        }
+
+        public BrightnessResponse ConfirmBrightness()
         {
             Brightness = PendingBrightness;
-            LastUpdated = DateTime.UtcNow;
+            return new BrightnessResponse
+            {
+                CurrentBrightness = Brightness,
+                PendingBrightness = PendingBrightness
+            };
         }
 
-        public void CancelBrightnessChange()
+        public BrightnessResponse CancelBrightnessChange()
         {
             PendingBrightness = Brightness;
+            return new BrightnessResponse
+            {
+                CurrentBrightness = Brightness,
+                PendingBrightness = PendingBrightness
+            };
         }
 
-        public void SetColor(string hexColor)
+        public ColorResponse SetColor(string hexColor)
         {
             if (IsValidHexColor(hexColor))
             {
                 Color = hexColor;
                 ConvertHexToRgb(hexColor);
-                LastUpdated = DateTime.UtcNow;
+                return new ColorResponse
+                {
+                    HexColor = Color,
+                    Red = Red,
+                    Green = Green,
+                    Blue = Blue
+                };
             }
+
+            return new ColorResponse
+            {
+                Success = false,
+                ErrorMessage = "Invalid hex color format",
+                HexColor = Color,
+                Red = Red,
+                Green = Green,
+                Blue = Blue
+            };
         }
 
-        public void SetColor(int red, int green, int blue)
+        public ColorResponse SetColor(int red, int green, int blue)
         {
             if (red >= 0 && red <= 255 && green >= 0 && green <= 255 && blue >= 0 && blue <= 255)
             {
@@ -89,8 +195,40 @@ namespace Lamp.Core.Models
                 Green = green;
                 Blue = blue;
                 Color = $"#{red:X2}{green:X2}{blue:X2}";
-                LastUpdated = DateTime.UtcNow;
+
+                return new ColorResponse
+                {
+                    HexColor = Color,
+                    Red = Red,
+                    Green = Green,
+                    Blue = Blue
+                };
             }
+
+            return new ColorResponse
+            {
+                Success = false,
+                ErrorMessage = "RGB values must be between 0-255",
+                HexColor = Color,
+                Red = Red,
+                Green = Green,
+                Blue = Blue
+            };
+        }
+
+        public FullStatusResponse GetFullStatus()
+        {
+            return new FullStatusResponse
+            {
+                IsOn = IsOn,
+                Brightness = Brightness,
+                PendingBrightness = PendingBrightness,
+                Color = Color,
+                Red = Red,
+                Green = Green,
+                Blue = Blue,
+                LastUpdated = LastUpdated
+            };
         }
 
         private bool IsValidHexColor(string hexColor)
