@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 [ApiController]
-[Route("")]
+[Route("/")]
 public class DomoticASWHttpProtocol : ControllerBase
 {
-    private static bool _isOn = false;
-    private static int _brightness = 50;
+    private readonly Lamp lamp = new Lamp();
 
     [HttpGet("check-status")]
     public IActionResult CheckStatus()
@@ -19,22 +19,34 @@ public class DomoticASWHttpProtocol : ControllerBase
         switch (deviceActionId.ToLower())
         {
             case "turn-on":
-                _isOn = true;
+                lamp.TurnOn();
                 return Ok();
             case "turn-off":
-                _isOn = false;
+                lamp.TurnOff();
                 return Ok();
             case "set-brightness":
                 if (input?.Input is JsonElement jsonElement && jsonElement.TryGetInt32(out int value))
                 {
                     if (value >= 1 && value <= 100)
                     {
-                        _brightness = value;
+                        lamp.SetBrightness(value);
                         return Ok();
                     }
                     return BadRequest("Brightness must be between 1 and 100");
                 }
                 return BadRequest("Invalid input for brightness");
+            case "set-color":
+                if (input?.Input is JsonElement colorElement && colorElement.ValueKind == JsonValueKind.String)
+                {
+                    string? color = colorElement.GetString();
+                    if (color != null && System.Text.RegularExpressions.Regex.IsMatch(color, "^#([0-9A-Fa-f]{6})$"))
+                    {
+                        lamp.SetColor(color.Trim());
+                        return Ok();
+                    }
+                    return BadRequest("Invalid hex color format. Use format: #RRGGBB");
+                }
+                return BadRequest("Invalid input for color");
             default:
                 return NotFound("Unknown action");
         }
@@ -45,26 +57,88 @@ public class DomoticASWHttpProtocol : ControllerBase
     {
         var device = new
         {
-            id = "lamp001",
+            id = "lamp-001",
             name = "Smart Lamp",
-            actions = new[]
+            properties = new object[]
             {
-                new { id = "turn-on", name = "Turn On", inputTypeConstraints = new { }, description = "Turns the lamp on" },
-                new { id = "turn-off", name = "Turn Off", inputTypeConstraints = new { }, description = "Turns the lamp off" },
-                new { id = "set-brightness", name = "Set Brightness", inputTypeConstraints = new { type = "number", min = 1, max = 100 }, description = "Sets the lamp brightness" }
-            },
-            events = new object[] { },
-            properties = new[]
-            {
+                new {
+                    id = "state",
+                    name = "State",
+                    value = false,
+                    typeConstraints = new {
+                        type = "Boolean",
+                        constraint = "None"
+                    }
+                },
                 new {
                     id = "brightness",
                     name = "Brightness",
-                    value = _brightness,
-                    setterActionId = "set-brightness"
+                    value = 100,
+                    typeConstraints = new {
+                        constraint = "IntRange",
+                        min = 1,
+                        max = 100
+                    }
+                },
+                new {
+                    id = "color",
+                    name = "Color",
+                    value = "#FF00FF",
+                    typeConstraints = new {
+                        type = "String",
+                        constraint = "None"
+                    }
                 }
-            }
+            },
+            actions = new object[]
+            {
+                new {
+                    id = "turn-on",
+                    name = "Turn On",
+                    description = "Turns the lamp on",
+                    inputTypeConstraints = new {
+                        type = "Void",
+                        constraint = "None"
+                    }
+                },
+                new {
+                    id = "turn-off",
+                    name = "Turn Off",
+                    description = "Turns the lamp off",
+                    inputTypeConstraints = new {
+                        type = "Void",
+                        constraint = "None"
+                    }
+                },
+                new {
+                    id = "set-brightness",
+                    name = "Set Brightness",
+                    description = "Sets the brightness level",
+                    inputTypeConstraints = new {
+                        constraint = "IntRange",
+                        min = 1,
+                        max = 100
+                    }
+                },
+                new {
+                    id = "set-color",
+                    name = "Set Color",
+                    description = "Changes the lamp color",
+                    inputTypeConstraints = new {
+                        type = "String",
+                        constraint = "None"
+                    }
+                }
+            },
+            events = new[] { "turned-on", "turned-off", "brightness-changed", "color-changed" }
         };
 
         return Ok(device);
     }
+
+    public class ExecuteInput
+    {
+        public JsonElement Input { get; set; }
+    }
+
 }
