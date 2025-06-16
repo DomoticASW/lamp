@@ -4,10 +4,10 @@ namespace Lamp.Core
 {
     public class BasicLamp
     {
-        public string Name { get; set; } = Environment.GetEnvironmentVariable("NAME") ?? "Lamp-01";
-        public bool IsOn { get; set; } = false;
-        public int Brightness { get; set; } = 100;
-        public string ColorHex { get; set; } = "#FFFFFF";
+        public string Name { get; } = Environment.GetEnvironmentVariable("NAME") ?? "Lamp-01";
+        public bool IsOn { get; private set; } = false;
+        public int Brightness { get; private set; } = 100;
+        public string ColorHex { get; private set; } = "#FFFFFF";
 
         public void TurnOn()
         {
