@@ -1,16 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Lamp.Models;
+using Lamp.Services;
 
 [ApiController]
 [Route("/")]
-public class DomoticASWHttpProtocol : ControllerBase
+public class DomoticASWHttpProtocol(ILampService lampService) : ControllerBase
 {
-    private readonly Lamp lamp = new Lamp();
+    private readonly BasicLamp lamp = lampService.Lamp;
 
     [HttpGet("check-status")]
     public IActionResult CheckStatus()
     {
-        return Ok(); // If it's reachable, return 200 OK
+        return Ok(new { IsOn = lamp.IsOn, Brightness = lamp.Brightness, Color = lamp.ColorHex });
     }
 
     [HttpPost("execute/{deviceActionId}")]
@@ -20,17 +22,17 @@ public class DomoticASWHttpProtocol : ControllerBase
         {
             case "turn-on":
                 lamp.TurnOn();
-                return Ok();
+                return Ok(new { IsOn = lamp.IsOn });
             case "turn-off":
                 lamp.TurnOff();
-                return Ok();
+                return Ok(new { IsOn = lamp.IsOn });
             case "set-brightness":
                 if (input?.Input is JsonElement jsonElement && jsonElement.TryGetInt32(out int value))
                 {
                     if (value >= 1 && value <= 100)
                     {
                         lamp.SetBrightness(value);
-                        return Ok();
+                        return Ok(new { Brightness = lamp.Brightness });
                     }
                     return BadRequest("Brightness must be between 1 and 100");
                 }
@@ -42,7 +44,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                     if (color != null && System.Text.RegularExpressions.Regex.IsMatch(color, "^#([0-9A-Fa-f]{6})$"))
                     {
                         lamp.SetColor(color.Trim());
-                        return Ok();
+                        return Ok(new { Color = lamp.ColorHex });
                     }
                     return BadRequest("Invalid hex color format. Use format: #RRGGBB");
                 }
