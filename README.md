@@ -8,10 +8,14 @@ A lamp simulated device to test DomoticASW
 
 ## Run with Docker
 
+To run the lamp device using Docker, you can use the following commands:
+
 ```bash
 docker pull fracarluccii/lamp:latest
-docker run -d -p 8080:80 fracarluccii/lamp
+docker run -d -p 8080:80 -e NAME=Lamp-01 fracarluccii/lamp
 ```
+
+IF you want you can pass the name of the lamp as an environment variable `NAME`
 
 ## Endpoints
 
