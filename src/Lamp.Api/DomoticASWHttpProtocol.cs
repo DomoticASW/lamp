@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using Lamp.Models;
+using Lamp.Core;
 using Lamp.Services;
 
 [ApiController]

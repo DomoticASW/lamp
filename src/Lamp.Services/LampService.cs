@@ -1,4 +1,4 @@
-using Lamp.Models;
+using Lamp.Core;
 
 namespace Lamp.Services;
 

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Lamp.Models
+namespace Lamp.Core
 {
     public class BasicLamp
     {
