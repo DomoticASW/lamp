@@ -59,8 +59,8 @@ public class DomoticASWHttpProtocol(ILampService lampService) : ControllerBase
     {
         var device = new
         {
-            id = "lamp-001",
-            name = "Smart Lamp",
+            id = "234956789012",
+            name = lamp.Name,
             properties = new object[]
             {
                 new {
@@ -85,7 +85,7 @@ public class DomoticASWHttpProtocol(ILampService lampService) : ControllerBase
                 new {
                     id = "color",
                     name = "Color",
-                    value = "#FF00FF",
+                    value = "#FFFFFF",
                     typeConstraints = new {
                         type = "String",
                         constraint = "None"

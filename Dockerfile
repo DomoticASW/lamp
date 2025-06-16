@@ -1,4 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+ENV NAME=Lamp-01
+
 WORKDIR /app
 
 COPY . ./
