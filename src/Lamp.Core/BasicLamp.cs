@@ -5,6 +5,7 @@ namespace Lamp.Core
     public class BasicLamp
     {
         public string Name { get; } = Environment.GetEnvironmentVariable("NAME") ?? "Lamp-01";
+        public string Id { get; } = "421723782384";
         public bool IsOn { get; private set; } = false;
         public int Brightness { get; private set; } = 100;
         public string ColorHex { get; private set; } = "#FFFFFF";

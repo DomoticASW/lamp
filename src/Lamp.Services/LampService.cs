@@ -4,5 +4,5 @@ namespace Lamp.Services;
 
 public class LampService : ILampService
 {
-    public BasicLamp Lamp { get; } = new BasicLamp();
+    public LampAgent Lamp { get; } = new LampAgent(new Ports.ServerCommunicationProtocolHttpAdapter(), new BasicLamp());
 }

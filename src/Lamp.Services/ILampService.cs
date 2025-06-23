@@ -4,5 +4,5 @@ namespace Lamp.Services;
 
 public interface ILampService
 {
-    BasicLamp Lamp { get; }
+    LampAgent Lamp { get; }
 }
