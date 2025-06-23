@@ -1,4 +1,4 @@
-﻿namespace Thermometer.Ports
+﻿namespace Lamp.Ports
 {
     public record ServerAddress(string Host, int Port);
 

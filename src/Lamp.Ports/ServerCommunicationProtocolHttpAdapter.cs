@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Thermometer.Ports
+namespace Lamp.Ports
 {
     public class ServerCommunicationProtocolHttpAdapter : IServerCommunicationProtocol
     {
