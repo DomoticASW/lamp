@@ -5,14 +5,23 @@ using Lamp.Services;
 
 [ApiController]
 [Route("/")]
-public class DomoticASWHttpProtocol(ILampService lampService) : ControllerBase
+public class DomoticASWHttpProtocol : ControllerBase
 {
-    private readonly BasicLamp lamp = lampService.Lamp;
+     private readonly ILampService _lampService;
+    private readonly LampAgent _lampAgent;
+    private readonly BasicLamp _lamp;
+
+    public DomoticASWHttpProtocol(ILampService lampService)
+    {
+        _lampService = lampService;
+        _lampAgent = _lampService.Lamp;
+        _lamp = _lampAgent.lamp;
+    }
 
     [HttpGet("check-status")]
     public IActionResult CheckStatus()
     {
-        return Ok(new { IsOn = lamp.IsOn, Brightness = lamp.Brightness, Color = lamp.ColorHex });
+        return Ok(new { IsOn = _lamp.IsOn, Brightness = _lamp.Brightness, Color = _lamp.ColorHex });
     }
 
     [HttpPost("execute/{deviceActionId}")]
@@ -21,18 +30,18 @@ public class DomoticASWHttpProtocol(ILampService lampService) : ControllerBase
         switch (deviceActionId.ToLower())
         {
             case "turn-on":
-                lamp.TurnOn();
-                return Ok(new { IsOn = lamp.IsOn });
+                _lamp.TurnOn();
+                return Ok(new { IsOn = _lamp.IsOn });
             case "turn-off":
-                lamp.TurnOff();
-                return Ok(new { IsOn = lamp.IsOn });
+                _lamp.TurnOff();
+                return Ok(new { IsOn = _lamp.IsOn });
             case "set-brightness":
                 if (input?.Input is JsonElement jsonElement && jsonElement.TryGetInt32(out int value))
                 {
                     if (value >= 1 && value <= 100)
                     {
-                        lamp.SetBrightness(value);
-                        return Ok(new { Brightness = lamp.Brightness });
+                        _lamp.SetBrightness(value);
+                        return Ok(new { Brightness = _lamp.Brightness });
                     }
                     return BadRequest("Brightness must be between 1 and 100");
                 }
@@ -43,8 +52,8 @@ public class DomoticASWHttpProtocol(ILampService lampService) : ControllerBase
                     string? color = colorElement.GetString();
                     if (color != null && System.Text.RegularExpressions.Regex.IsMatch(color, "^#([0-9A-Fa-f]{6})$"))
                     {
-                        lamp.SetColor(color.Trim());
-                        return Ok(new { Color = lamp.ColorHex });
+                        _lamp.SetColor(color.Trim());
+                        return Ok(new { Color = _lamp.ColorHex });
                     }
                     return BadRequest("Invalid hex color format. Use format: #RRGGBB");
                 }
@@ -57,10 +66,19 @@ public class DomoticASWHttpProtocol(ILampService lampService) : ControllerBase
     [HttpPost("register")]
     public IActionResult Register()
     {
+        if (Environment.GetEnvironmentVariable("SERVER_ADDRESS") is null &&
+            Environment.GetEnvironmentVariable("SERVER_PORT") is null)
+        {
+            _lampAgent.SetServerAddress(
+                Request.Host.Host,
+                Request.Host.Port ?? 8080
+            );
+        }
+        _lampAgent.Start(TimeSpan.FromSeconds(30));
         var device = new
         {
-            id = "234956789012",
-            name = lamp.Name,
+            id = _lamp.Id,
+            name = _lamp.Name,
             properties = new object[]
             {
                 new {
@@ -142,5 +160,4 @@ public class DomoticASWHttpProtocol(ILampService lampService) : ControllerBase
     {
         public JsonElement Input { get; set; }
     }
-
 }
