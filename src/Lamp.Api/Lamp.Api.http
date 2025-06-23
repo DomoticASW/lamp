@@ -1,0 +1,51 @@
+@Lamp.Api_HostAddress = http://localhost:5066
+
+GET {{Lamp.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{Lamp.Api_HostAddress}}/execute/turn-on
+Content-Type: application/json
+
+{
+  "input": null
+}
+
+###
+
+POST {{Lamp.Api_HostAddress}}/execute/turn-off
+Content-Type: application/json
+
+{
+  "input": null
+}   
+
+###
+
+POST {{Lamp.Api_HostAddress}}/register
+Content-Type: application/json
+
+{
+  "input": null
+}
+
+###
+
+POST {{Lamp.Api_HostAddress}}/execute/set-brightness
+Content-Type: application/json
+
+{
+  "input": 75
+}
+
+###
+
+POST {{Lamp.Api_HostAddress}}/execute/set-color
+Content-Type: application/json
+
+{
+  "input": #FF5733
+}
+
+###
