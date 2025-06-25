@@ -1,6 +1,6 @@
 ﻿namespace Lamp.Ports
 {
-    public record ServerAddress(string Host, int Port);
+    public record ServerAddress(string Host, int ServerPort);
 
     public interface IServerCommunicationProtocol
     {
