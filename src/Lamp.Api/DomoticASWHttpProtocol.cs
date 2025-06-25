@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Lamp.Core;
 using Lamp.Services;
+using Lamp.Ports;
 
 [ApiController]
 [Route("/")]
@@ -64,17 +65,13 @@ public class DomoticASWHttpProtocol : ControllerBase
     }
 
     [HttpPost("register")]
-    public IActionResult Register()
+   public IActionResult Register([FromBody] ServerAddress input)
     {
-        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SERVER_ADDRESS")) &&
-            string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SERVER_PORT")))
+        if (input?.Host is string host && input?.Port is int port && !string.IsNullOrEmpty(host) && port > 0)
         {
-            _lampAgent.SetServerAddress(
-                Request.Host.Host,
-                Request.Host.Port ?? 8080
-            );
+            _lampAgent.SetServerAddress(host, port);
+            _lampAgent.Start(TimeSpan.FromSeconds(30));
         }
-        _lampAgent.Start(TimeSpan.FromSeconds(30));
         var device = new
         {
             id = _lamp.Id,

@@ -8,21 +8,25 @@ namespace Lamp.Core
 {
     public class LampAgent
     {
-        private readonly HttpClient _httpClient = new();
         private readonly ServerCommunicationProtocolHttpAdapter _server;
-        private ServerAddress _serverAddress = new(
-            Environment.GetEnvironmentVariable("SERVER_ADDRESS") ?? "",
-            int.Parse(Environment.GetEnvironmentVariable("SERVER_PORT") ?? "")
-        );
+        private ServerAddress? _serverAddress;
         private Timer? _timer;
+        public BasicLamp lamp;
         private bool _lastIsOn;
         private int _lastBrightness;
         private string _lastColorHex;
-        public BasicLamp lamp = new();
 
         public LampAgent(ServerCommunicationProtocolHttpAdapter server)
         {
+            string? serverAddress = Environment.GetEnvironmentVariable("SERVER_ADDRESS");
+            string? serverPort = Environment.GetEnvironmentVariable("SERVER_PORT");
+
+            if (serverAddress is not null && serverPort is not null)
+            {
+                _serverAddress = new ServerAddress(serverAddress, int.Parse(serverPort));
+            }
             _server = server;
+            lamp = new BasicLamp();
             _lastIsOn = lamp.IsOn;
             _lastBrightness = lamp.Brightness;
             _lastColorHex = lamp.ColorHex;
@@ -60,7 +64,7 @@ namespace Lamp.Core
                 _lastColorHex = lamp.ColorHex;
             }
 
-            await _server.UpdateState(_serverAddress, "state", lamp.IsOn, lamp.Id);
+            await _server.UpdateState(_serverAddress, "turned-on", lamp.IsOn, lamp.Id);
             await _server.UpdateState(_serverAddress, "brightness", lamp.Brightness, lamp.Id);
             await _server.UpdateState(_serverAddress, "color", lamp.ColorHex, lamp.Id);
         }
