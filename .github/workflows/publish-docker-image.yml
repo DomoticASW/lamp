@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: docker.
-  IMAGE_NAME: fracarluccii/lamp
+  IMAGE_NAME: fracarluccii/domoticasw-lamp
 
 jobs:
   build-and-push:
@@ -28,4 +28,4 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/lamp:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/domoticasw-lamp:latest
