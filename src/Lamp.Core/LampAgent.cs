@@ -31,6 +31,19 @@ namespace Lamp.Core
             {
                 _serverAddress = new ServerAddress(serverAddress, int.Parse(serverPort));
             }
+
+            string? discoveryAddress = Environment.GetEnvironmentVariable("DISCOVERY_ADDRESS");
+            string? discoveryPort = Environment.GetEnvironmentVariable("DISCOVERY_PORT");
+
+            if (discoveryAddress is not null && discoveryPort is not null)
+            {
+                _discoveryBroadcastAddress = new ServerAddress(discoveryAddress, int.Parse(discoveryPort));
+            }
+            else
+            {
+            _discoveryBroadcastAddress = new ServerAddress("255.255.255.255", 30000);
+            }            
+
             _server = server;
             Lamp = new BasicLamp();
             _lastIsOn = Lamp.IsOn;
