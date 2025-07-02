@@ -30,7 +30,6 @@ public class LampService : ILampService, IHostedService
                     {
                         await Lamp.AnnouncePresenceAsync();
                         await Task.Delay(5000, _cts.Token);
-                        Console.WriteLine("Lamp presence announcement sent");
                     }
                     catch (OperationCanceledException)
                     {
