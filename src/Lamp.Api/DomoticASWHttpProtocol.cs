@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Lamp.Core;
 using Lamp.Services;
-using Lamp.Ports;
 
 [ApiController]
 [Route("/")]
@@ -16,7 +15,7 @@ public class DomoticASWHttpProtocol : ControllerBase
     {
         _lampService = lampService;
         _lampAgent = _lampService.Lamp;
-        _lamp = _lampAgent.lamp;
+        _lamp = _lampAgent.Lamp;
     }
 
     [HttpGet("check-status")]
@@ -31,12 +30,15 @@ public class DomoticASWHttpProtocol : ControllerBase
         switch (deviceActionId.ToLower())
         {
             case "turn-on":
+                Console.WriteLine($"Executing action: {deviceActionId}");
                 _lamp.TurnOn();
                 return Ok(new { IsOn = _lamp.IsOn });
             case "turn-off":
+                Console.WriteLine($"Executing action: {deviceActionId}");
                 _lamp.TurnOff();
                 return Ok(new { IsOn = _lamp.IsOn });
             case "set-brightness":
+                Console.WriteLine($"Executing action: {deviceActionId} with input: {input?.Input}");
                 if (input?.Input is JsonElement jsonElement && jsonElement.TryGetInt32(out int value))
                 {
                     if (value >= 1 && value <= 100)
@@ -48,6 +50,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                 }
                 return BadRequest("Invalid input for brightness");
             case "set-color":
+                Console.WriteLine($"Executing action: {deviceActionId} with input: {input?.Input}");
                 if (input?.Input is JsonElement colorElement && colorElement.ValueKind == JsonValueKind.String)
                 {
                     string? color = colorElement.GetString();
@@ -65,12 +68,17 @@ public class DomoticASWHttpProtocol : ControllerBase
     }
 
     [HttpPost("register")]
-   public IActionResult Register([FromBody] ServerAddress input)
+    public IActionResult Register([FromBody] JsonElement Input)
     {
-        if (input?.Host is string host && input?.ServerPort is int port && !string.IsNullOrEmpty(host) && port > 0)
+        int port = Input.GetProperty("serverPort").GetInt32();
+        if (port <= 0 || port > 65535)
         {
-            _lampAgent.SetServerAddress(host, port);
-            _lampAgent.Start(TimeSpan.FromSeconds(30));
+            return BadRequest("Invalid port number");
+        }
+        {
+            _lampAgent.SetServerAddress(Request.HttpContext.Connection.RemoteIpAddress!.ToString(), port);
+            Console.WriteLine($"Lamp registered at {Request.HttpContext.Connection.RemoteIpAddress}:{port}");
+            _lampAgent.Registered = true;
         }
         var device = new
         {

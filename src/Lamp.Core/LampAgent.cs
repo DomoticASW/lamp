@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using Lamp.Ports;
 
 namespace Lamp.Core
@@ -10,14 +11,19 @@ namespace Lamp.Core
     {
         private readonly ServerCommunicationProtocolHttpAdapter _server;
         private ServerAddress? _serverAddress;
+        private readonly ServerAddress _discoveryBroadcastAddress;
         private Timer? _timer;
-        public BasicLamp lamp;
+        public BasicLamp Lamp { get; private set; }
         private bool _lastIsOn;
         private int _lastBrightness;
         private string _lastColorHex;
+        private readonly int _devicePort;
+        public bool Registered { get; set; } = false;
 
         public LampAgent(ServerCommunicationProtocolHttpAdapter server)
         {
+            _discoveryBroadcastAddress = new ServerAddress("255.255.255.255", 30000);
+            _devicePort = int.Parse(Environment.GetEnvironmentVariable("DEVICE_PORT") ?? "8080");
             string? serverAddress = Environment.GetEnvironmentVariable("SERVER_ADDRESS");
             string? serverPort = Environment.GetEnvironmentVariable("SERVER_PORT");
 
@@ -26,10 +32,25 @@ namespace Lamp.Core
                 _serverAddress = new ServerAddress(serverAddress, int.Parse(serverPort));
             }
             _server = server;
-            lamp = new BasicLamp();
-            _lastIsOn = lamp.IsOn;
-            _lastBrightness = lamp.Brightness;
-            _lastColorHex = lamp.ColorHex;
+            Lamp = new BasicLamp();
+            _lastIsOn = Lamp.IsOn;
+            _lastBrightness = Lamp.Brightness;
+            _lastColorHex = Lamp.ColorHex;
+            _ = AnnouncePresenceAsync();
+        }
+
+        public async Task<bool> AnnouncePresenceAsync()
+        {
+            try
+            {
+                await _server.Announce(_discoveryBroadcastAddress, _devicePort, Lamp.Id, Lamp.Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send announcement: {ex.Message}");
+                return false;
+            }
         }
 
         public void Start(TimeSpan interval)
@@ -45,28 +66,28 @@ namespace Lamp.Core
 
         private async void UpdateAndSend(object? state)
         {
-            if (lamp.IsOn != _lastIsOn)
+            if (Lamp.IsOn != _lastIsOn)
             {
-                var evt = lamp.IsOn ? "turned-on" : "turned-off";
-                await _server.SendEvent(_serverAddress, evt, lamp.Id);
-                _lastIsOn = lamp.IsOn;
+                var evt = Lamp.IsOn ? "turned-on" : "turned-off";
+                await _server.SendEvent(_serverAddress!, evt, Lamp.Id);
+                _lastIsOn = Lamp.IsOn;
             }
 
-            if (lamp.Brightness != _lastBrightness)
+            if (Lamp.Brightness != _lastBrightness)
             {
-                await _server.SendEvent(_serverAddress, "brightness-changed", lamp.Id);
-                _lastBrightness = lamp.Brightness;
+                await _server.SendEvent(_serverAddress!, "brightness-changed", Lamp.Id);
+                _lastBrightness = Lamp.Brightness;
             }
 
-            if (lamp.ColorHex != _lastColorHex)
+            if (Lamp.ColorHex != _lastColorHex)
             {
-                await _server.SendEvent(_serverAddress, "color-changed", lamp.Id);
-                _lastColorHex = lamp.ColorHex;
+                await _server.SendEvent(_serverAddress!, "color-changed", Lamp.Id);
+                _lastColorHex = Lamp.ColorHex;
             }
 
-            await _server.UpdateState(_serverAddress, "turned-on", lamp.IsOn, lamp.Id);
-            await _server.UpdateState(_serverAddress, "brightness", lamp.Brightness, lamp.Id);
-            await _server.UpdateState(_serverAddress, "color", lamp.ColorHex, lamp.Id);
+            await _server.UpdateState(_serverAddress!, "turned-on", Lamp.IsOn, Lamp.Id);
+            await _server.UpdateState(_serverAddress!, "brightness", Lamp.Brightness, Lamp.Id);
+            await _server.UpdateState(_serverAddress!, "color", Lamp.ColorHex, Lamp.Id);
         }
 
         public void SetServerAddress(string host, int port)
