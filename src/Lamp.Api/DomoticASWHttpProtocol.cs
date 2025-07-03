@@ -148,7 +148,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                     name = "Set Color",
                     description = "Changes the lamp color",
                     inputTypeConstraints = new {
-                        type = "ColorType",
+                        type = "Color",
                         constraint = "None"
                     }
                 }
