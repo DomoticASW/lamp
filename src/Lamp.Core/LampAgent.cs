@@ -16,7 +16,7 @@ namespace Lamp.Core
         public BasicLamp Lamp { get; private set; }
         private bool _lastIsOn;
         private int _lastBrightness;
-        private string _lastColorHex;
+        private ColorType _lastColor;
         private readonly int _devicePort;
         public bool Registered { get; set; } = false;
 
@@ -42,14 +42,14 @@ namespace Lamp.Core
             }
             else
             {
-            _discoveryBroadcastAddress = new ServerAddress("255.255.255.255", 30000);
+                _discoveryBroadcastAddress = new ServerAddress("255.255.255.255", 30000);
             }            
 
             _server = server;
             Lamp = new BasicLamp();
             _lastIsOn = Lamp.IsOn;
             _lastBrightness = Lamp.Brightness;
-            _lastColorHex = Lamp.ColorHex;
+            _lastColor = Lamp.Color;
             _ = AnnouncePresenceAsync();
         }
 
@@ -93,15 +93,15 @@ namespace Lamp.Core
                 _lastBrightness = Lamp.Brightness;
             }
 
-            if (Lamp.ColorHex != _lastColorHex)
+            if (Lamp.Color != _lastColor)
             {
                 await _server.SendEvent(_serverAddress!, "color-changed", Lamp.Id);
-                _lastColorHex = Lamp.ColorHex;
+                _lastColor = Lamp.Color;
             }
 
             await _server.UpdateState(_serverAddress!, "turned-on", Lamp.IsOn, Lamp.Id);
             await _server.UpdateState(_serverAddress!, "brightness", Lamp.Brightness, Lamp.Id);
-            await _server.UpdateState(_serverAddress!, "color", Lamp.ColorHex, Lamp.Id);
+            await _server.UpdateState(_serverAddress!, "color", Lamp.Color, Lamp.Id);
         }
 
         public void SetServerAddress(string host, int port)

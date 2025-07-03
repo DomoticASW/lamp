@@ -21,7 +21,7 @@ public class DomoticASWHttpProtocol : ControllerBase
     [HttpGet("check-status")]
     public IActionResult CheckStatus()
     {
-        return Ok(new { IsOn = _lamp.IsOn, Brightness = _lamp.Brightness, Color = _lamp.ColorHex });
+        return Ok(new { IsOn = _lamp.IsOn, Brightness = _lamp.Brightness, Color = _lamp.Color });
     }
 
     [HttpPost("execute/{deviceActionId}")]
@@ -51,17 +51,18 @@ public class DomoticASWHttpProtocol : ControllerBase
                 return BadRequest("Invalid input for brightness");
             case "set-color":
                 Console.WriteLine($"Executing action: {deviceActionId} with input: {input?.Input}");
-                if (input?.Input is JsonElement colorElement && colorElement.ValueKind == JsonValueKind.String)
+                if (input?.Input is JsonElement colorElement)
                 {
-                    string? color = colorElement.GetString();
-                    if (color != null && System.Text.RegularExpressions.Regex.IsMatch(color, "^#([0-9A-Fa-f]{6})$"))
+                    if (colorElement.TryGetProperty("r", out var rProp) && rProp.ValueKind == JsonValueKind.Number &&
+                        colorElement.TryGetProperty("g", out var gProp) && gProp.ValueKind == JsonValueKind.Number &&
+                        colorElement.TryGetProperty("b", out var bProp) && bProp.ValueKind == JsonValueKind.Number &&
+                        rProp.TryGetInt32(out int r) && gProp.TryGetInt32(out int g) && bProp.TryGetInt32(out int b))
                     {
-                        _lamp.SetColor(color.Trim());
-                        return Ok(new { Color = _lamp.ColorHex });
+                        _lamp.SetColor(r, g, b);
+                        return Ok(new { Color = _lamp.Color });
                     }
-                    return BadRequest("Invalid hex color format. Use format: #RRGGBB");
                 }
-                return BadRequest("Invalid input for color");
+                return BadRequest("Invalid color format. Use format: { \"r\": 255, \"g\": 255, \"b\": 255 }");
             default:
                 return NotFound("Unknown action");
         }
@@ -99,20 +100,17 @@ public class DomoticASWHttpProtocol : ControllerBase
                     id = "brightness",
                     name = "Brightness",
                     value = 100,
-                    typeConstraints = new {
-                        constraint = "IntRange",
-                        min = 1,
-                        max = 100
-                    }
+                    setterActionId = "set-brightness",
                 },
                 new {
                     id = "color",
                     name = "Color",
-                    value = "#FFFFFF",
-                    typeConstraints = new {
-                        type = "String",
-                        constraint = "None"
-                    }
+                    value = new {
+                        r = 255,
+                        g = 255,
+                        b = 255,
+                    },
+                    setterActionId = "set-color",
                 }
             },
             actions = new object[]
@@ -150,7 +148,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                     name = "Set Color",
                     description = "Changes the lamp color",
                     inputTypeConstraints = new {
-                        type = "String",
+                        type = "ColorType",
                         constraint = "None"
                     }
                 }
