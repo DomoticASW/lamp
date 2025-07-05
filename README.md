@@ -4,31 +4,47 @@ A lamp simulated device to test DomoticASW
 
 ## Docker Hub
 
-[Docker Hub - fracarluccii/lamp](https://hub.docker.com/repository/docker/fracarluccii/lamp/general)
+[Docker Hub - fracarluccii/domoticasw-lamp](https://hub.docker.com/repository/docker/fracarluccii/domoticasw-lamp/general)
 
 ## Run with Docker
 
 To run the lamp device using Docker, you can use the following commands:
 
 ```bash
-docker pull fracarluccii/lamp:latest
-docker run -d -p 8080:80 -e NAME=Lamp-01 fracarluccii/lamp
+docker run fracarluccii/domoticasw-lamp 
 ```
 
-IF you want you can pass the name of the lamp as an environment variable `NAME`
+### Variables
 
-## Endpoints
+The following configurations can be passed to the container as environment variables
 
-| Metodo | URL                       | Descrizione                     |
-| ------ | ------------------------- | ------------------------------- |
-| GET    | `/check-status`           | Current status of the lamp      |
-| POST   | `/register`               | Register the lamp in the server |
-| POST   | `/execute/turn-on`        | Turn on the lamp                |
-| POST   | `/execute/turn-off`       | Turn off the lamp               |
-| POST   | `/execute/set-brightness` | Set the brightness of the lamp  |
-| POST   | `/execute/set-color`      | Set the color of the lamp       |
+| Variable name     | Default value   | Explanation                         |
+| ----------------- | --------------- | ----------------------------------- |
+| NAME              | Lamp-01         | lamp name                           |
+| DEVICE_PORT       | 8093            | Port used by the lamp device        |
+| SERVER_ADDRESS    | localhost       | Address of the server               |
+| SERVER_PORT       | 3000            | Port of the server                  |
+| DISCOVERY_ADDRESS | 255.255.255.255 | Address for discovery broadcasts    |
+| DISCOVERY_PORT    | 30000           | Port for discovery broadcasts       |
 
-Body example for setting brightness:
+## How to use
+
+At first send <code><\<device-address\>>/register</code> request to the device to register it in the server.
+
+## Properties
+
+- <b>state</b>: The current state of the lamp (on/off).
+- <b>brightness</b>: The current brightness level of the lamp (0-100).
+- <b>color</b>: The current color of the lamp in RGB format.
+
+## Actions
+
+- <code><\<device-address\>>/execute/turn-on</code>: Turn on the lamp.
+- <code><\<device-address\>>/execute/turn-off</code>: Turn off the lamp.
+- <code><\<device-address\>>/execute/set-brightness</code>: Set the desired brightness level on the lamp.
+- <code><\<device-address\>>/execute/set-color</code>: Set the desired color on the lamp.
+
+Body example for set-brightness:
 
 ```json
 {
@@ -36,10 +52,22 @@ Body example for setting brightness:
 }
 ```
 
-Body example for setting color:
+Body example for set-color:
 
 ```json
 {
-  "input": "#CAFF70"
+  "input":
+        {
+          "r" : 127,
+          "g" : 127,
+          "b" : 127
+        }
 }
 ```
+
+## Events
+
+- <b>turned-on</b>: Triggered when the lamp is turned on.
+- <b>turned-off</b>: Triggered when the lamp is turned off.
+- <b>brightness-changed</b>: Triggered when the brightness level changes.
+- <b>color-changed</b>: Triggered when the color changes.
