@@ -4,8 +4,8 @@ namespace Lamp.Core
 {
     public class BasicLamp
     {
-        public string Name { get; } = Environment.GetEnvironmentVariable("NAME") ?? "Lamp-01";
-        public string Id { get; } = "421723782384";
+        public string Name { get; } = Environment.GetEnvironmentVariable("NAME") ?? "Lamp";
+        public string Id { get; } = "lamp-01";
         public bool IsOn { get; private set; } = false;
         public int Brightness { get; private set; } = 100;
         public ColorType Color { get; private set; } = new ColorType(255, 255, 255);
@@ -46,5 +46,5 @@ namespace Lamp.Core
         }
     }
 
-    public record ColorType(int R, int G, int B);
+    public record ColorType(int r, int g, int b);
 }
