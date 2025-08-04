@@ -99,7 +99,7 @@ namespace Lamp.Core
                 _lastColor = Lamp.Color;
             }
 
-            await _server.UpdateState(_serverAddress!, "turned-on", Lamp.IsOn, Lamp.Id);
+            await _server.UpdateState(_serverAddress!, "state", Lamp.IsOn, Lamp.Id);
             await _server.UpdateState(_serverAddress!, "brightness", Lamp.Brightness, Lamp.Id);
             await _server.UpdateState(_serverAddress!, "color", Lamp.Color, Lamp.Id);
         }
