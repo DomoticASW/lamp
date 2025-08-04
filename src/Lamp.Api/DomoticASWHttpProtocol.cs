@@ -117,7 +117,7 @@ public class DomoticASWHttpProtocol : ControllerBase
             {
                 new {
                     id = "turn-on",
-                    name = "Turn On",
+                    name = "Turn on",
                     description = "Turns the lamp on",
                     inputTypeConstraints = new {
                         type = "Void",
@@ -126,7 +126,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                 },
                 new {
                     id = "turn-off",
-                    name = "Turn Off",
+                    name = "Turn off",
                     description = "Turns the lamp off",
                     inputTypeConstraints = new {
                         type = "Void",
@@ -135,7 +135,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                 },
                 new {
                     id = "set-brightness",
-                    name = "Set Brightness",
+                    name = "Set brightness",
                     description = "Sets the brightness level",
                     inputTypeConstraints = new {
                         constraint = "IntRange",
@@ -145,7 +145,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                 },
                 new {
                     id = "set-color",
-                    name = "Set Color",
+                    name = "Set color",
                     description = "Changes the lamp color",
                     inputTypeConstraints = new {
                         type = "Color",
