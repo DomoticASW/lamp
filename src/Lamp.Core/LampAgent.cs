@@ -12,12 +12,13 @@ namespace Lamp.Core
         private readonly ServerCommunicationProtocolHttpAdapter _server;
         private ServerAddress? _serverAddress;
         private readonly ServerAddress _discoveryBroadcastAddress;
-        private Timer? _timer;
+        private Thread? _workerThread;
         public BasicLamp Lamp { get; private set; }
         private bool _lastIsOn;
         private int _lastBrightness;
         private ColorType _lastColor;
         private readonly int _devicePort;
+        private volatile bool _isRunning;
         public bool Registered { get; set; } = false;
 
         public LampAgent(ServerCommunicationProtocolHttpAdapter server)
@@ -67,41 +68,51 @@ namespace Lamp.Core
             }
         }
 
-        public void Start(TimeSpan interval)
+        public void Start()
         {
-            _timer = new Timer(UpdateAndSend, null, TimeSpan.Zero, interval);
-            Console.WriteLine($"Lamp agent started. Sending updates every {interval.TotalSeconds} seconds.");
+            _isRunning = true;
+            _workerThread = new Thread(UpdateAndSend)
+            {
+                IsBackground = true,
+                Name = "LampAgentWorker"
+            };
+            
+            _workerThread.Start();
+            Console.WriteLine($"Lamp agent started");
         }
 
         public void Stop()
         {
-            _timer?.Dispose();
+            _isRunning = false;
+            _workerThread?.Join();
         }
 
         private async void UpdateAndSend(object? state)
         {
-            if (Lamp.IsOn != _lastIsOn)
+            while (_isRunning)
             {
-                var evt = Lamp.IsOn ? "turned-on" : "turned-off";
-                await _server.SendEvent(_serverAddress!, evt, Lamp.Id);
-                _lastIsOn = Lamp.IsOn;
-            }
+                if (Lamp.IsOn != _lastIsOn)
+                {
+                    var evt = Lamp.IsOn ? "turned-on" : "turned-off";
+                    await _server.SendEvent(_serverAddress!, evt, Lamp.Id);
+                    _lastIsOn = Lamp.IsOn;
+                    await _server.UpdateState(_serverAddress!, "state", Lamp.IsOn, Lamp.Id);
+                }
 
-            if (Lamp.Brightness != _lastBrightness)
-            {
-                await _server.SendEvent(_serverAddress!, "brightness-changed", Lamp.Id);
-                _lastBrightness = Lamp.Brightness;
-            }
+                if (Lamp.Brightness != _lastBrightness)
+                {
+                    await _server.SendEvent(_serverAddress!, "brightness-changed", Lamp.Id);
+                    _lastBrightness = Lamp.Brightness;
+                    await _server.UpdateState(_serverAddress!, "brightness", Lamp.Brightness, Lamp.Id);
+                }
 
-            if (Lamp.Color != _lastColor)
-            {
-                await _server.SendEvent(_serverAddress!, "color-changed", Lamp.Id);
-                _lastColor = Lamp.Color;
+                if (Lamp.Color != _lastColor)
+                {
+                    await _server.SendEvent(_serverAddress!, "color-changed", Lamp.Id);
+                    _lastColor = Lamp.Color;
+                    await _server.UpdateState(_serverAddress!, "color", Lamp.Color, Lamp.Id);
+                }
             }
-
-            await _server.UpdateState(_serverAddress!, "state", Lamp.IsOn, Lamp.Id);
-            await _server.UpdateState(_serverAddress!, "brightness", Lamp.Brightness, Lamp.Id);
-            await _server.UpdateState(_serverAddress!, "color", Lamp.Color, Lamp.Id);
         }
 
         public void SetServerAddress(string host, int port)

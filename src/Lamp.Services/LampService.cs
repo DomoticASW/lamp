@@ -37,7 +37,7 @@ public class LampService : ILampService, IHostedService
                 }
                 if (Lamp.Registered)
                 {
-                    Lamp.Start(TimeSpan.FromSeconds(30));
+                    Lamp.Start();
                 }
             }, _cts.Token);
         }
