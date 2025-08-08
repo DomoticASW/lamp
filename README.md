@@ -39,8 +39,7 @@ At first send <code><\<device-address\>>/register</code> request to the device t
 
 ## Actions
 
-- <code><\<device-address\>>/execute/turn-on</code>: Turn on the lamp.
-- <code><\<device-address\>>/execute/turn-off</code>: Turn off the lamp.
+- <code><\<device-address\>>/execute/switch</code>: Switch the state of the lamp.
 - <code><\<device-address\>>/execute/set-brightness</code>: Set the desired brightness level on the lamp.
 - <code><\<device-address\>>/execute/set-color</code>: Set the desired color on the lamp.
 
