@@ -112,7 +112,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                     id = "switch",
                     name = "Switch",
                     description = "Switches the lamp on or off",
-                    typeConstraints = new {
+                    inputTypeConstraints = new {
                         type = "Boolean",
                         constraint = "None"
                     }
