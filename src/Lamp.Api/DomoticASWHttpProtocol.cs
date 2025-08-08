@@ -52,7 +52,8 @@ public class DomoticASWHttpProtocol : ControllerBase
                     if (colorElement.TryGetProperty("r", out var rProp) && rProp.ValueKind == JsonValueKind.Number &&
                         colorElement.TryGetProperty("g", out var gProp) && gProp.ValueKind == JsonValueKind.Number &&
                         colorElement.TryGetProperty("b", out var bProp) && bProp.ValueKind == JsonValueKind.Number &&
-                        rProp.TryGetInt32(out int r) && gProp.TryGetInt32(out int g) && bProp.TryGetInt32(out int b))
+                        rProp.TryGetInt32(out int r) && gProp.TryGetInt32(out int g) && bProp.TryGetInt32(out int b) &&
+                        r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255)
                     {
                         _lamp.SetColor(r, g, b);
                         return Ok(new { Color = _lamp.Color });
