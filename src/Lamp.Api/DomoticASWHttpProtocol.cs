@@ -29,13 +29,9 @@ public class DomoticASWHttpProtocol : ControllerBase
     {
         switch (deviceActionId.ToLower())
         {
-            case "turn-on":
+            case "switch":
                 Console.WriteLine($"Executing action: {deviceActionId}");
-                _lamp.TurnOn();
-                return Ok(new { IsOn = _lamp.IsOn });
-            case "turn-off":
-                Console.WriteLine($"Executing action: {deviceActionId}");
-                _lamp.TurnOff();
+                _lamp.Switch();
                 return Ok(new { IsOn = _lamp.IsOn });
             case "set-brightness":
                 Console.WriteLine($"Executing action: {deviceActionId} with input: {input?.Input}");
@@ -46,9 +42,9 @@ public class DomoticASWHttpProtocol : ControllerBase
                         _lamp.SetBrightness(value);
                         return Ok(new { Brightness = _lamp.Brightness });
                     }
-                    return BadRequest("Brightness must be between 1 and 100");
+                    return BadRequest(new { cause = "Brightness must be between 1 and 100" });
                 }
-                return BadRequest("Invalid input for brightness");
+                return BadRequest(new { cause = "Invalid input for brightness" });
             case "set-color":
                 Console.WriteLine($"Executing action: {deviceActionId} with input: {input?.Input}");
                 if (input?.Input is JsonElement colorElement)
@@ -62,9 +58,9 @@ public class DomoticASWHttpProtocol : ControllerBase
                         return Ok(new { Color = _lamp.Color });
                     }
                 }
-                return BadRequest("Invalid color format. Use format: { \"r\": 255, \"g\": 255, \"b\": 255 }");
+                return BadRequest(new { cause = "Invalid color format. Use format: { \"r\": 255, \"g\": 255, \"b\": 255 }" });
             default:
-                return NotFound("Unknown action");
+                return NotFound(new { cause = "Unknown action" });
         }
     }
 
@@ -74,7 +70,7 @@ public class DomoticASWHttpProtocol : ControllerBase
         int port = Input.GetProperty("serverPort").GetInt32();
         if (port <= 0 || port > 65535)
         {
-            return BadRequest("Invalid port number");
+            return BadRequest(new { cause = "Invalid port number" });
         }
         {
             _lampAgent.SetServerAddress(Request.HttpContext.Connection.RemoteIpAddress!.ToString(), port);
@@ -91,10 +87,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                     id = "state",
                     name = "State",
                     value = false,
-                    typeConstraints = new {
-                        type = "Boolean",
-                        constraint = "None"
-                    }
+                    setterActionId = "switch",
                 },
                 new {
                     id = "brightness",
@@ -116,20 +109,11 @@ public class DomoticASWHttpProtocol : ControllerBase
             actions = new object[]
             {
                 new {
-                    id = "turn-on",
-                    name = "Turn on",
-                    description = "Turns the lamp on",
-                    inputTypeConstraints = new {
-                        type = "Void",
-                        constraint = "None"
-                    }
-                },
-                new {
-                    id = "turn-off",
-                    name = "Turn off",
-                    description = "Turns the lamp off",
-                    inputTypeConstraints = new {
-                        type = "Void",
+                    id = "switch",
+                    name = "Switch",
+                    description = "Switches the lamp on or off",
+                    typeConstraints = new {
+                        type = "Boolean",
                         constraint = "None"
                     }
                 },
@@ -153,7 +137,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                     }
                 }
             },
-            events = new[] { "turned-on", "turned-off", "brightness-changed", "color-changed" }
+            events = new[] { "switched", "brightness-changed", "color-changed" }
         };
 
         return Ok(device);
