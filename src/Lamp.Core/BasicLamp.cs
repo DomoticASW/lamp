@@ -10,27 +10,13 @@ namespace Lamp.Core
         public int Brightness { get; private set; } = 100;
         public ColorType Color { get; private set; } = new ColorType(255, 255, 255);
 
-        public void TurnOn()
-        {
-            IsOn = true;
-        }
+        public void TurnOn() => IsOn = true;
 
-        public void TurnOff()
-        {
-            IsOn = false;
-        }
+        public void TurnOff() => IsOn = false;
 
-        public void Switch()
-        {
-            IsOn = !IsOn;
-        }
+        public void Switch() => IsOn = !IsOn;
 
-        public void SetBrightness(int value)
-        {
-            if (value < 1) value = 1;
-            if (value > 100) value = 100;
-            Brightness = value;
-        }
+        public void SetBrightness(int value) => Brightness = Math.Clamp(value, 1, 100);
 
         public void SetColor(int r, int g, int b)
         {
