@@ -137,7 +137,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                     }
                 }
             },
-            events = new[] { "switched", "brightness-changed", "color-changed" }
+            events = new[] { "turned-on", "turned-off", "brightness-changed", "color-changed" }
         };
 
         return Ok(device);
