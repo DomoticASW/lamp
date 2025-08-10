@@ -112,6 +112,8 @@ namespace Lamp.Core
                     _lastColor = Lamp.Color;
                     await _server.UpdateState(_serverAddress!, "color", Lamp.Color, Lamp.Id);
                 }
+
+                await Task.Delay(200);
             }
         }
 
