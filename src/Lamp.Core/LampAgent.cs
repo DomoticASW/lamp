@@ -23,15 +23,25 @@ namespace Lamp.Core
 
         public LampAgent(ServerCommunicationProtocolHttpAdapter server)
         {
-            _discoveryBroadcastAddress = new ServerAddress("255.255.255.255", 30000);
             _devicePort = int.Parse(Environment.GetEnvironmentVariable("DEVICE_PORT") ?? "8093");
             string? serverAddress = Environment.GetEnvironmentVariable("SERVER_ADDRESS");
-            string? serverPort = Environment.GetEnvironmentVariable("SERVER_PORT");
 
-            if (serverAddress is not null && serverPort is not null)
+            if (serverAddress is not null && serverAddress.Contains(':'))
             {
-                _serverAddress = new ServerAddress(serverAddress, int.Parse(serverPort));
-                Registered = true;
+                string[] parts = serverAddress.Split(':');
+                if (parts.Length == 2 && int.TryParse(parts[1], out int port))
+                {
+                    _serverAddress = new ServerAddress(parts[0], port);
+                    Registered = true;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid SERVER_ADDRESS format. Expected format: 'host:port'.");
+                }
+            }
+            else
+            {
+                throw new ArgumentException("SERVER_ADDRESS environment variable is not set or is invalid.");
             }
 
             string? discoveryAddress = Environment.GetEnvironmentVariable("DISCOVERY_ADDRESS");
