@@ -24,7 +24,7 @@ namespace Lamp.Core
         public LampAgent(ServerCommunicationProtocolHttpAdapter server)
         {
             _discoveryBroadcastAddress = new ServerAddress("255.255.255.255", 30000);
-            _devicePort = int.Parse(Environment.GetEnvironmentVariable("DEVICE_PORT") ?? "8080");
+            _devicePort = int.Parse(Environment.GetEnvironmentVariable("DEVICE_PORT") ?? "8093");
             string? serverAddress = Environment.GetEnvironmentVariable("SERVER_ADDRESS");
             string? serverPort = Environment.GetEnvironmentVariable("SERVER_PORT");
 
