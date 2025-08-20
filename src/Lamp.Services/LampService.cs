@@ -28,20 +28,21 @@ public class LampService : ILampService, IHostedService
                 {
                     while (!_cts.IsCancellationRequested && !Lamp.Registered)
                     {
-                    try
-                    {
-                        await Lamp.AnnouncePresenceAsync();
-                        await Task.Delay(5000, _cts.Token);
+                        try
+                        {
+                            await Lamp.AnnouncePresenceAsync();
+                            await Task.Delay(5000, _cts.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                        }
                     }
-                    catch (OperationCanceledException)
+                    if (Lamp.Registered)
                     {
+                        Lamp.Start();
                     }
-                }
-                if (Lamp.Registered)
-                {
-                    Lamp.Start();
-                }
-            }, _cts.Token);
+                }, _cts.Token);
+            }
         }
         IsRunning = true;
         return Task.CompletedTask;
