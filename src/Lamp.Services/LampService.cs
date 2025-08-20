@@ -21,11 +21,13 @@ public class LampService : ILampService, IHostedService
 
         else
         {
-            Console.WriteLine("Lamp not registered, starting presence announcement loop");
-            _ = Task.Run(async () =>
+            if (!Lamp.Registered)
             {
-                while (!_cts.IsCancellationRequested && !Lamp.Registered)
+                Console.WriteLine("Lamp not registered, starting presence announcement loop");
+                _ = Task.Run(async () =>
                 {
+                    while (!_cts.IsCancellationRequested && !Lamp.Registered)
+                    {
                     try
                     {
                         await Lamp.AnnouncePresenceAsync();
