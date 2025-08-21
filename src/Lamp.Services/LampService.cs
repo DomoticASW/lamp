@@ -43,6 +43,10 @@ public class LampService : ILampService, IHostedService
                     }
                 }, _cts.Token);
             }
+            else
+            {
+                Lamp.Start();
+            }
         }
         IsRunning = true;
         return Task.CompletedTask;

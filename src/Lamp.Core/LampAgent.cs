@@ -39,10 +39,6 @@ namespace Lamp.Core
                     throw new ArgumentException("Invalid SERVER_ADDRESS format. Expected format: 'host:port'.");
                 }
             }
-            else
-            {
-                throw new ArgumentException("SERVER_ADDRESS environment variable is not set or is invalid.");
-            }
 
             string? discoveryAddress = Environment.GetEnvironmentVariable("DISCOVERY_ADDRESS");
             string? discoveryPort = Environment.GetEnvironmentVariable("DISCOVERY_PORT");
