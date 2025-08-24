@@ -24,11 +24,8 @@ namespace Lamp.Core
 
         public LampAgent(ServerCommunicationProtocolHttpAdapter server)
         {
-            _lanHostname = Environment.GetEnvironmentVariable("LAN_HOSTNAME")!;
-            if (_lanHostname is null)
-            {
-                throw new ArgumentException("LAN_HOSTNAME environment variable is not set.");
-            }
+            _lanHostname = Environment.GetEnvironmentVariable("LAN_HOSTNAME") 
+               ?? throw new ArgumentException("LAN_HOSTNAME environment variable is not set.");
 
             _devicePort = int.Parse(Environment.GetEnvironmentVariable("DEVICE_PORT") ?? "8093");
             string? serverAddress = Environment.GetEnvironmentVariable("SERVER_ADDRESS");
