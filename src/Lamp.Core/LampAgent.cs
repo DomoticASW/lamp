@@ -12,6 +12,7 @@ namespace Lamp.Core
         private readonly ServerCommunicationProtocolHttpAdapter _server;
         private ServerAddress? _serverAddress;
         private readonly ServerAddress _discoveryBroadcastAddress;
+        private readonly string _lanHostname;
         private Thread? _workerThread;
         public BasicLamp Lamp { get; private set; }
         private bool _lastIsOn;
@@ -23,6 +24,12 @@ namespace Lamp.Core
 
         public LampAgent(ServerCommunicationProtocolHttpAdapter server)
         {
+            _lanHostname = Environment.GetEnvironmentVariable("LAN_HOSTNAME")!;
+            if (_lanHostname is null)
+            {
+                throw new ArgumentException("LAN_HOSTNAME environment variable is not set.");
+            }
+
             _devicePort = int.Parse(Environment.GetEnvironmentVariable("DEVICE_PORT") ?? "8093");
             string? serverAddress = Environment.GetEnvironmentVariable("SERVER_ADDRESS");
 
@@ -64,7 +71,7 @@ namespace Lamp.Core
         {
             try
             {
-                await _server.Announce(_discoveryBroadcastAddress, _devicePort, Lamp.Id, Lamp.Name);
+                await _server.Announce(_discoveryBroadcastAddress, _devicePort, Lamp.Id, Lamp.Name, _lanHostname);
                 return true;
             }
             catch (Exception ex)

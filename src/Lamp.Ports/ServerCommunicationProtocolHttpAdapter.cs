@@ -53,13 +53,14 @@ namespace Lamp.Ports
             }
         }
         
-        public async Task Announce(ServerAddress discoveryBroadcastAddress, int devicePort, string lampId, string lampName)
+        public async Task Announce(ServerAddress discoveryBroadcastAddress, int devicePort, string lampId, string lampName, string lanHostname)
         {
             var message = new 
             {
                 id = lampId,
                 name = lampName,
-                port = devicePort
+                port = devicePort,
+                lan_hostname = lanHostname
             };
             string broadcastIp = discoveryBroadcastAddress.Host;
             int broadcastPort = discoveryBroadcastAddress.ServerPort;
