@@ -60,7 +60,7 @@ namespace Lamp.Ports
                 id = lampId,
                 name = lampName,
                 port = devicePort,
-                lan_hostname = lanHostname
+                lanHostname = lanHostname
             };
             string broadcastIp = discoveryBroadcastAddress.Host;
             int broadcastPort = discoveryBroadcastAddress.ServerPort;
