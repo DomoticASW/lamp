@@ -6,4 +6,5 @@ public interface ILampService
 {
     LampAgent Lamp { get; }
     bool IsRunning { get; }
+    Task Restart();
 }

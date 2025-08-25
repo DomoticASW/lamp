@@ -18,7 +18,6 @@ public class LampService : ILampService, IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         if (IsRunning) return Task.CompletedTask;
-
         else
         {
             if (!Lamp.Registered)
@@ -51,14 +50,25 @@ public class LampService : ILampService, IHostedService
         IsRunning = true;
         return Task.CompletedTask;
     }
-    
+
     public Task StopAsync(CancellationToken cancellationToken)
     {
         if (!IsRunning) return Task.CompletedTask;
-        
+
         _cts.Cancel();
         Lamp.Stop();
         IsRunning = false;
         return Task.CompletedTask;
+    }
+
+    public Task Restart()
+    {
+        await StopAsync(CancellationToken.None);
+    
+        _cts.Dispose();
+        _cts = new CancellationTokenSource();
+        
+        await Task.Delay(1000);
+        await StartAsync(CancellationToken.None);
     }
 }

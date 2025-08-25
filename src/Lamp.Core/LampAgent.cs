@@ -95,6 +95,7 @@ namespace Lamp.Core
         {
             _isRunning = false;
             _workerThread?.Join();
+            Registered = false;
         }
 
         private async void UpdateAndSend(object? state)

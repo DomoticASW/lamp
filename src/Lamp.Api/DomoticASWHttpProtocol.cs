@@ -59,7 +59,7 @@ public class DomoticASWHttpProtocol : ControllerBase
                         return Ok(new { Color = _lamp.Color });
                     }
                 }
-                return BadRequest(new { cause = "Invalid color format. Use format: { \"r\": 255, \"g\": 255, \"b\": 255 }" });
+                return BadRequest(new { cause = "Invalid color format. Use format: { \"r\": 255, \"g\": 255, \"b\": 255 }" }); 
             default:
                 return NotFound(new { cause = "Unknown action" });
         }
@@ -142,6 +142,14 @@ public class DomoticASWHttpProtocol : ControllerBase
         };
 
         return Ok(device);
+    }
+
+    [HttpPost("unregister")]
+    public IActionResult Unregister()
+    {
+        _lampService.Restart();
+        Console.WriteLine($"Lamp unregistered");
+        return Ok();
     }
 
     public class ExecuteInput
