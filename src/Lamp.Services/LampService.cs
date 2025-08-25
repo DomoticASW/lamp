@@ -8,7 +8,7 @@ public class LampService : ILampService, IHostedService
 {
     public LampAgent Lamp { get; }
     public bool IsRunning { get; private set; }
-    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource _cts = new();
 
     public LampService()
     {
@@ -61,7 +61,7 @@ public class LampService : ILampService, IHostedService
         return Task.CompletedTask;
     }
 
-    public Task Restart()
+    public async Task Restart()
     {
         await StopAsync(CancellationToken.None);
     
