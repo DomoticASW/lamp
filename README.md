@@ -20,7 +20,8 @@ The following configurations can be passed to the container as environment varia
 
 | Variable name     | Default value   | Explanation                         |
 | ----------------- | --------------- | ----------------------------------- |
-| NAME              | Lamp-01         | lamp name                           |
+| ID                | lamp-01         | lamp ID                             |
+| NAME              | Lamp            | lamp name                           |
 | DEVICE_PORT       | 8093            | Port used by the lamp device        |
 | SERVER_ADDRESS    | /               | Address:port of the server          |
 | DISCOVERY_ADDRESS | 255.255.255.255 | Address for discovery broadcasts    |
