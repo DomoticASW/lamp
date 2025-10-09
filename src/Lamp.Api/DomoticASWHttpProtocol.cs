@@ -73,9 +73,15 @@ public class DomoticASWHttpProtocol : ControllerBase
         {
             return BadRequest(new { cause = "Invalid port number" });
         }
+        string? serverAddress = Input.GetProperty("serverAddress").GetString();
+        if (string.IsNullOrEmpty(serverAddress))
         {
-            _lampAgent.SetServerAddress(Request.HttpContext.Connection.RemoteIpAddress!.ToString(), port);
-            Console.WriteLine($"Lamp registered at {Request.HttpContext.Connection.RemoteIpAddress}:{port}");
+            return BadRequest(new { cause = "Invalid server address" });
+        }
+        else
+        {
+            _lampAgent.SetServerAddress(serverAddress, port);
+            Console.WriteLine($"Lamp registered at {serverAddress}:{port}");
             _lampAgent.Registered = true;
         }
         var device = new
